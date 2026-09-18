@@ -28,7 +28,10 @@ public:
 	TArray<APlataforma*> aPlataformas;
 
 	FTimerHandle TimerEliminarPlataforma;
-	
+	FTimerHandle TimerSpawnPlataforma;
+
+	void SpawnearPlataforma();
+
 	void EliminarPlataforma();
 
 	int tipoPlataformaActual;

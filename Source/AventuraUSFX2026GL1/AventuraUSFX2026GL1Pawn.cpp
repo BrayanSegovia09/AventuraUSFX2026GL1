@@ -2,6 +2,7 @@
 
 #include "AventuraUSFX2026GL1Pawn.h"
 #include "AventuraUSFX2026GL1Projectile.h"
+#include "Pelota.h"
 #include "TimerManager.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Camera/CameraComponent.h"
@@ -20,12 +21,23 @@ const FName AAventuraUSFX2026GL1Pawn::FireRightBinding("FireRight");
 
 AAventuraUSFX2026GL1Pawn::AAventuraUSFX2026GL1Pawn()
 {	
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> ShipMesh(TEXT("/Game/TwinStick/Meshes/TwinStickUFO.TwinStickUFO"));
+	//static ConstructorHelpers::FObjectFinder<UStaticMesh> ShipMesh(TEXT("/Game/TwinStick/Meshes/TwinStickUFO.TwinStickUFO"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> ShipMesh(TEXT("StaticMesh'/Game/StarterContent/Shapes/Shape_Plane.Shape_Plane'"));
 	// Create the mesh component
 	ShipMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ShipMesh"));
 	RootComponent = ShipMeshComponent;
 	ShipMeshComponent->SetCollisionProfileName(UCollisionProfile::Pawn_ProfileName);
 	ShipMeshComponent->SetStaticMesh(ShipMesh.Object);
+
+	static ConstructorHelpers::FObjectFinder<UMaterial> MaterialAsset(TEXT("Material'/Game/StarterContent/Materials/M_PlataformaPawn.M_PlataformaPawn'"));
+	if (MaterialAsset.Succeeded())
+	{
+		ShipMeshComponent->SetMaterial(0, MaterialAsset.Object);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("NO SE ENCONTRO M_PlataformaPawn"));
+	}
 	
 	// Cache our sound effect
 	static ConstructorHelpers::FObjectFinder<USoundBase> FireAudio(TEXT("/Game/TwinStick/Audio/TwinStickFire.TwinStickFire"));
@@ -48,7 +60,7 @@ AAventuraUSFX2026GL1Pawn::AAventuraUSFX2026GL1Pawn()
 	MoveSpeed = 1000.0f;
 	// Weapon
 	GunOffset = FVector(90.f, 0.f, 0.f);
-	FireRate = 0.1f;
+	FireRate = 3.0f;
 	bCanFire = true;
 }
 
@@ -57,7 +69,7 @@ void AAventuraUSFX2026GL1Pawn::SetupPlayerInputComponent(class UInputComponent* 
 	check(PlayerInputComponent);
 
 	// set up gameplay key bindings
-	PlayerInputComponent->BindAxis(MoveForwardBinding);
+	//PlayerInputComponent->BindAxis(MoveForwardBinding);
 	PlayerInputComponent->BindAxis(MoveRightBinding);
 	PlayerInputComponent->BindAxis(FireForwardBinding);
 	PlayerInputComponent->BindAxis(FireRightBinding);
@@ -66,11 +78,11 @@ void AAventuraUSFX2026GL1Pawn::SetupPlayerInputComponent(class UInputComponent* 
 void AAventuraUSFX2026GL1Pawn::Tick(float DeltaSeconds)
 {
 	// Find movement direction
-	const float ForwardValue = GetInputAxisValue(MoveForwardBinding);
+	//const float ForwardValue = GetInputAxisValue(MoveForwardBinding);
 	const float RightValue = GetInputAxisValue(MoveRightBinding);
 
 	// Clamp max size so that (X=1, Y=1) doesn't cause faster movement in diagonal directions
-	const FVector MoveDirection = FVector(ForwardValue, RightValue, 0.f).GetClampedToMaxSize(1.0f);
+	const FVector MoveDirection = FVector(0.0f, RightValue, 0.f).GetClampedToMaxSize(1.0f);
 
 	// Calculate  movement
 	const FVector Movement = MoveDirection * MoveSpeed * DeltaSeconds;
@@ -78,7 +90,8 @@ void AAventuraUSFX2026GL1Pawn::Tick(float DeltaSeconds)
 	// If non-zero size, move this actor
 	if (Movement.SizeSquared() > 0.0f)
 	{
-		const FRotator NewRotation = Movement.Rotation();
+		const FRotator NewRotation = GetActorRotation();
+		//const FRotator NewRotation = Movement.Rotation();
 		FHitResult Hit(1.f);
 		RootComponent->MoveComponent(Movement, NewRotation, true, &Hit);
 		
@@ -115,7 +128,7 @@ void AAventuraUSFX2026GL1Pawn::FireShot(FVector FireDirection)
 			if (World != nullptr)
 			{
 				// spawn the projectile
-				World->SpawnActor<AAventuraUSFX2026GL1Projectile>(SpawnLocation, FireRotation);
+				World->SpawnActor<APelota>(SpawnLocation, FireRotation);
 			}
 
 			bCanFire = false;

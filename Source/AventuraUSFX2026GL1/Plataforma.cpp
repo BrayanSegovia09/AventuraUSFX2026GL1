@@ -21,6 +21,8 @@ APlataforma::APlataforma()
 	mallaPlataforma->SetStaticMesh(PlataformaMeshAsset.Object);
 	mallaPlataforma->SetupAttachment(RootComponent);
 
+	
+
 	RootComponent = mallaPlataforma;
 	/*
 	ZMax = 800.0f;

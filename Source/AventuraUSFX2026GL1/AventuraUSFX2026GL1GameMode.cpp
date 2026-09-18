@@ -8,6 +8,10 @@
 #include "PlataformaSubterranea.h"
 #include "PlataformaAcuatica.h"
 #include "PlataformaOverlap.h"
+#include "MiniEscenario.h"
+#include "PlataformaIndestructible.h"
+#include "PlataformaDestructible.h"
+#include "kismet/GameplayStatics.h"
 
 AAventuraUSFX2026GL1GameMode::AAventuraUSFX2026GL1GameMode()
 {
@@ -34,7 +38,7 @@ void AAventuraUSFX2026GL1GameMode::BeginPlay()
 	APlataforma* plataformaActual;
 	int tipoPlataformaRandom;
 
-	for (int i = 0; i < 10; i++) {
+	for (int i = 0; i < 1; i++) {
 
 		SpawnLocation = FVector(FMath::RandRange(-1500.0f, 1500.0f), FMath::RandRange(-1500.0f, 1500.0f), FMath::RandRange(50.0f, 1000.0f));
 
@@ -87,11 +91,15 @@ void AAventuraUSFX2026GL1GameMode::BeginPlay()
 		} */
 	GetWorldTimerManager().SetTimer(TimerEliminarPlataforma, this, &AAventuraUSFX2026GL1GameMode::EliminarPlataforma, 15.0f, true, 5.0f);
 
-	World->SpawnActor<APlataformaTerrestre>(FVector(-200.0f, -300.0f, 150.0f), FRotator::ZeroRotator);
+	/*World->SpawnActor<APlataformaTerrestre>(FVector(-200.0f, -300.0f, 150.0f), FRotator::ZeroRotator);
 	World->SpawnActor<APlataformaTerrestre>(FVector(-200.0f, 300.0f, 150.0f), FRotator::ZeroRotator);
-	World->SpawnActor<APlataformaOverlap>(FVector(300.0f, 0.0f, 200.0f), FRotator::ZeroRotator);
+	World->SpawnActor<APlataformaOverlap>(FVector(300.0f, 0.0f, 200.0f), FRotator::ZeroRotator);*/
 
+	World->SpawnActor<AMiniEscenario>(FVector(0.0f,0.0f, 150.0f), FRotator::ZeroRotator);
+
+	GetWorldTimerManager().SetTimer(TimerSpawnPlataforma, this, &AAventuraUSFX2026GL1GameMode::SpawnearPlataforma, 5.0f,true);
 }
+
 
 void AAventuraUSFX2026GL1GameMode::Tick(float DeltaTime)
 {
@@ -159,4 +167,65 @@ void AAventuraUSFX2026GL1GameMode::EliminarPlataforma()
 		}
 	}*/
 
+}
+void AAventuraUSFX2026GL1GameMode::SpawnearPlataforma()
+{
+	UWorld* World = GetWorld();
+
+	if (World == nullptr) return;
+
+	AMiniEscenario* MiniEscenario = Cast<AMiniEscenario>(
+		UGameplayStatics::GetActorOfClass(World, AMiniEscenario::StaticClass())
+	);
+
+	if (MiniEscenario == nullptr) return;
+
+	FVector Ubicacion1 = MiniEscenario->SpawnZona1->GetComponentLocation();
+	FVector Ubicacion2 = MiniEscenario->SpawnZona2->GetComponentLocation();
+	FVector Ubicacion3 = MiniEscenario->SpawnZona3->GetComponentLocation();
+
+	if (FMath::RandRange(0, 1) == 0)
+	{
+		World->SpawnActor<APlataformaIndestructible>(
+			Ubicacion1,
+			FRotator::ZeroRotator
+		);
+	}
+	else
+	{
+		World->SpawnActor<APlataformaDestructible>(
+			Ubicacion1,
+			FRotator::ZeroRotator
+		);
+	}
+
+	if (FMath::RandRange(0, 1) == 0)
+	{
+		World->SpawnActor<APlataformaIndestructible>(
+			Ubicacion2,
+			FRotator::ZeroRotator
+		);
+	}
+	else
+	{
+		World->SpawnActor<APlataformaDestructible>(
+			Ubicacion2,
+			FRotator::ZeroRotator
+		);
+	}
+
+	if (FMath::RandRange(0, 1) == 0)
+	{
+		World->SpawnActor<APlataformaIndestructible>(
+			Ubicacion3,
+			FRotator::ZeroRotator
+		);
+	}
+	else
+	{
+		World->SpawnActor<APlataformaDestructible>(
+			Ubicacion3,
+			FRotator::ZeroRotator
+		);
+	}
 }
